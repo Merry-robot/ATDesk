@@ -1,0 +1,10 @@
+{
+  "airportCode": "KATD",
+  "runwayName": "18",
+  "runwayLength": 6.0,
+  "patternOffset": 4.0,
+  "patternLength": 8.0,
+  "taxiSpeed": 0.4,
+  "rolloutSpeed": 0.6,
+  "patternSpeed": 0.8
+}
