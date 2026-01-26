@@ -6,10 +6,13 @@ import com.atdesk.core.Position;
 import com.atdesk.core.Runway;
 import com.atdesk.core.SimulationLoop;
 import com.atdesk.core.SimulationState;
+import com.atdesk.core.TrafficGenerator;
+import com.atdesk.core.TrafficTemplate;
 import com.atdesk.data.AircraftConfig;
 import com.atdesk.data.AirportConfig;
 import com.atdesk.data.JsonLoader;
 import com.atdesk.data.ScenarioConfig;
+import com.atdesk.data.SpawnTemplate;
 import com.atdesk.input.CommandPanel;
 import com.atdesk.input.CommandProcessor;
 import com.atdesk.rendering.ScopePanel;
@@ -42,7 +45,8 @@ public class App {
             ));
         }
 
-        SimulationState simulationState = new SimulationState(airportConfig, runway, aircraft);
+        TrafficGenerator trafficGenerator = buildTrafficGenerator(scenarioConfig);
+        SimulationState simulationState = new SimulationState(airportConfig, runway, aircraft, trafficGenerator);
         SimulationLoop loop = new SimulationLoop(simulationState, 1000);
 
         SwingUtilities.invokeLater(() -> buildUi(simulationState, loop));
@@ -71,5 +75,24 @@ public class App {
         frame.setVisible(true);
 
         loop.start();
+    }
+
+    private static TrafficGenerator buildTrafficGenerator(ScenarioConfig scenarioConfig) {
+        if (scenarioConfig.getSpawnTemplates() == null || scenarioConfig.getSpawnTemplates().isEmpty()) {
+            return null;
+        }
+        List<TrafficTemplate> templates = new ArrayList<>();
+        for (SpawnTemplate template : scenarioConfig.getSpawnTemplates()) {
+            templates.add(new TrafficTemplate(
+                template.getIdPrefix(),
+                template.getCallsignPrefix(),
+                AircraftState.valueOf(template.getState()),
+                new Position(template.getX(), template.getY()),
+                template.getRunway()
+            ));
+        }
+        int intervalTicks = scenarioConfig.getSpawnIntervalTicks();
+        int maxActive = scenarioConfig.getMaxActiveAircraft();
+        return new TrafficGenerator(templates, intervalTicks, maxActive);
     }
 }

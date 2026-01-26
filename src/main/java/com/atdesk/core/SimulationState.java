@@ -11,6 +11,7 @@ public class SimulationState {
     private final AirportConfig airportConfig;
     private final Runway runway;
     private final List<Aircraft> aircraft;
+    private TrafficGenerator trafficGenerator;
     private final double arrivalThreshold = 0.5;
     private long tickCount;
 
@@ -18,6 +19,11 @@ public class SimulationState {
         this.airportConfig = airportConfig;
         this.runway = runway;
         this.aircraft = new ArrayList<>(aircraft);
+    }
+
+    public SimulationState(AirportConfig airportConfig, Runway runway, List<Aircraft> aircraft, TrafficGenerator trafficGenerator) {
+        this(airportConfig, runway, aircraft);
+        this.trafficGenerator = trafficGenerator;
     }
 
     public AirportConfig getAirportConfig() {
@@ -32,6 +38,10 @@ public class SimulationState {
         return Collections.unmodifiableList(aircraft);
     }
 
+    public void addAircraft(Aircraft newAircraft) {
+        aircraft.add(newAircraft);
+    }
+
     public long getTickCount() {
         return tickCount;
     }
@@ -44,6 +54,9 @@ public class SimulationState {
         tickCount++;
         for (Aircraft aircraft : aircraft) {
             aircraft.update(this);
+        }
+        if (trafficGenerator != null) {
+            trafficGenerator.onTick(tickCount, this);
         }
     }
 
